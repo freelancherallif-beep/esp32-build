@@ -1,0 +1,36 @@
+name: ESP32 Arduino Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install ESP32 Arduino CLI
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json -o package_esp32_index.json
+        arduino-cli core update-index --additional-urls package_esp32_index.json
+        arduino-cli core install esp32:esp32 --additional-urls package_esp32_index.json
+
+    - name: Compile Sketch
+      run: |
+        arduino-cli compile --fqbn esp32:esp32:esp32 myESP32Project
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: esp32-build
+        path: |
+          myESP32Project/build/esp32.esp32.esp32/*.bin
