@@ -4,35 +4,39 @@ on:
   push:
     branches:
       - main
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Install Arduino CLI
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-          echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
+    - name: Install Arduino CLI
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+        export PATH="$HOME/bin:$PATH"
+        arduino-cli version
 
-      - name: Update Arduino CLI
-        run: arduino-cli core update-index
+    - name: Setup Arduino ESP32 Board
+      run: |
+        export PATH="$HOME/bin:$PATH"
+        arduino-cli core update-index
+        arduino-cli core install esp32:esp32
 
-      - name: Install ESP32 board
-        run: arduino-cli core install esp32:esp32
+    - name: Compile Sketch
+      run: |
+        export PATH="$HOME/bin:$PATH"
+        arduino-cli compile --fqbn esp32:esp32:esp32 myESP32Project
 
-      - name: Compile ESP32 Sketch
-        run: arduino-cli compile --fqbn esp32:esp32:esp32 myESP32Project --verbose
+    - name: List Build Directory
+      run: |
+        ls -R myESP32Project/build/
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: esp32-build
-          path: myESP32Project/build/**/*.bin
-          if-no-files-found: warn
-          compression-level: 6
-          overwrite: false
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: esp32-bin
+        path: myESP32Project/build/**/*.bin
