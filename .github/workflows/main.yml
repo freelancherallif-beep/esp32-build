@@ -1,17 +1,14 @@
-name: ESP32 Build
+name: ESP32 Build & Flash
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
-  build:
+  build-flash:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout your repository
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -32,13 +29,19 @@ jobs:
           arduino-cli core update-index
           arduino-cli core install esp32:esp32
 
-      # 5️⃣ Compile your Sketch
+      # 5️⃣ Compile Sketch
       - name: Compile Sketch
         run: arduino-cli compile --fqbn esp32:esp32:esp32 myESP32Project
 
-      # 6️⃣ Upload build artifacts (.bin files)
+      # 6️⃣ Optional: Upload build artifacts (.bin files)
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: esp32-bin
           path: myESP32Project/build/**/*.bin
+
+      # 7️⃣ Flash Sketch to ESP32 (local USB required)
+      - name: Flash Sketch (Local only)
+        if: false # GitHub runner can't access local USB
+        run: |
+          arduino-cli upload -p /dev/ttyUSB0 --fqbn esp32:esp32:esp32 myESP32Project
