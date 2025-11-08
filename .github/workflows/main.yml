@@ -11,29 +11,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout your repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2️⃣ Install Arduino CLI & fix PATH
       - name: Install Arduino CLI
         run: |
           curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
           echo "$HOME/bin" >> $GITHUB_PATH
         shell: bash
 
+      # 3️⃣ Verify Arduino CLI
       - name: Verify Arduino CLI
         run: arduino-cli version
 
+      # 4️⃣ Update cores index & install ESP32 core
       - name: Setup ESP32 Board
         run: |
           arduino-cli core update-index
           arduino-cli core install esp32:esp32
 
+      # 5️⃣ Compile your Sketch
       - name: Compile Sketch
         run: arduino-cli compile --fqbn esp32:esp32:esp32 myESP32Project
 
-      - name: List Build Directory
-        run: ls -R myESP32Project/build/
-
+      # 6️⃣ Upload build artifacts (.bin files)
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
