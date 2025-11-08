@@ -1,44 +1,38 @@
-name: Build ESP32 Project
+name: ESP32 Build
 
 on:
   push:
     branches:
       - main
   pull_request:
-    branches:
-      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ কোড pull করা
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Arduino CLI install করা
       - name: Install Arduino CLI
         run: |
           curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-          # PATH-এ যোগ করা
-          echo "/home/runner/work/esp32-build/esp32-build/bin" >> $GITHUB_PATH
+          echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
 
-      # 3️⃣ ESP32 core install করা
-      - name: Install ESP32 Core
-        run: |
-          arduino-cli core update-index
-          arduino-cli core install esp32:esp32
+      - name: Update Arduino CLI
+        run: arduino-cli core update-index
 
-      # 4️⃣ Compile ESP32 sketch
-      - name: Compile ESP32 sketch
-        run: |
-          arduino-cli compile --fqbn esp32:esp32:esp32 myESP32Project
+      - name: Install ESP32 board
+        run: arduino-cli core install esp32:esp32
 
-      # 5️⃣ Upload compiled .bin artifacts
+      - name: Compile ESP32 Sketch
+        run: arduino-cli compile --fqbn esp32:esp32:esp32 myESP32Project --verbose
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: esp32-build
-          path: myESP32Project/build/esp32.esp32.esp32/*.bin
+          path: myESP32Project/build/**/*.bin
           if-no-files-found: warn
+          compression-level: 6
+          overwrite: false
