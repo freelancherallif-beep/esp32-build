@@ -13,22 +13,27 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
-
-    - name: Install ESP32 Arduino CLI
+    # Install Arduino CLI
+    - name: Install Arduino CLI
       run: |
-        curl -fsSL https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json -o package_esp32_index.json
-        arduino-cli core update-index --additional-urls package_esp32_index.json
-        arduino-cli core install esp32:esp32 --additional-urls package_esp32_index.json
+        curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+        sudo mv bin/arduino-cli /usr/local/bin/
 
+    # Configure Arduino CLI
+    - name: Configure Arduino CLI
+      run: |
+        arduino-cli config init
+        arduino-cli config set board_manager.additional_urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+        arduino-cli core update-index
+        arduino-cli core install esp32:esp32
+
+    # Compile the ESP32 Sketch
     - name: Compile Sketch
       run: |
         arduino-cli compile --fqbn esp32:esp32:esp32 myESP32Project
 
-    - name: Upload artifacts
+    # Upload Build Files
+    - name: Upload Firmware Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: esp32-build
