@@ -21,20 +21,18 @@ jobs:
       - name: Install Arduino CLI
         run: |
           curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-          export PATH="$HOME/.arduino15/bin:$HOME/bin:$PATH"
-          arduino-cli version
-          
+          # PATH-এ যোগ করা
+          echo "/home/runner/work/esp32-build/esp32-build/bin" >> $GITHUB_PATH
+
       # 3️⃣ ESP32 core install করা
       - name: Install ESP32 Core
         run: |
-          export PATH="$HOME/.arduino15/bin:$HOME/bin:$PATH"
           arduino-cli core update-index
           arduino-cli core install esp32:esp32
 
       # 4️⃣ Compile ESP32 sketch
       - name: Compile ESP32 sketch
         run: |
-          export PATH="$HOME/.arduino15/bin:$HOME/bin:$PATH"
           arduino-cli compile --fqbn esp32:esp32:esp32 myESP32Project
 
       # 5️⃣ Upload compiled .bin artifacts
