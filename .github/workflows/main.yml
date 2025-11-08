@@ -11,29 +11,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Install Arduino CLI
-      run: |
-        curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-        echo "$HOME/bin" >> $GITHUB_PATH  # PATH-এ add করা হবে
+      - name: Install Arduino CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+          echo "$HOME/bin" >> $GITHUB_PATH
+        shell: bash
 
-    - name: Setup Arduino ESP32 Board
-      run: |
-        arduino-cli core update-index
-        arduino-cli core install esp32:esp32
+      - name: Verify Arduino CLI
+        run: arduino-cli version
 
-    - name: Compile Sketch
-      run: |
-        arduino-cli compile --fqbn esp32:esp32:esp32 myESP32Project
+      - name: Setup ESP32 Board
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32
 
-    - name: List Build Directory
-      run: |
-        ls -R myESP32Project/build/
+      - name: Compile Sketch
+        run: arduino-cli compile --fqbn esp32:esp32:esp32 myESP32Project
 
-    - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: esp32-bin
-        path: myESP32Project/build/**/*.bin
+      - name: List Build Directory
+        run: ls -R myESP32Project/build/
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-bin
+          path: myESP32Project/build/**/*.bin
